@@ -2,11 +2,39 @@ import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "./prisma";
-import { Adapter } from "next-auth/adapters";
+import { Adapter, AdapterUser } from "next-auth/adapters";
 import GitHubProvider from "next-auth/providers/github";
+import { PrismaClient } from "@/generated/prisma/client";
+
+export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
+  const adapter = PrismaAdapter(prisma);
+
+  return {
+    ...adapter,
+    async createUser(data: Omit<AdapterUser, "id">) {
+      try {
+        const userData = {
+          ...data,
+          emailVerified: data.emailVerified
+            ? typeof data.emailVerified === "string"
+              ? new Date(data.emailVerified)
+              : data.emailVerified
+            : new Date(),
+        };
+        const user = await adapter.createUser!(
+          userData as unknown as AdapterUser
+        );
+        return user;
+      } catch (error) {
+        console.error("Error creating user:", error);
+        throw error;
+      }
+    },
+  };
+}
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as Adapter,
+  adapter: CustomPrismaAdapter(prisma) as Adapter,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -24,6 +52,7 @@ export const authOptions: NextAuthOptions = {
           name: profile.name,
           email: profile.email,
           image: profile.picture,
+          emailVerified: null,
         };
       },
     }),
@@ -39,10 +68,11 @@ export const authOptions: NextAuthOptions = {
       },
       profile(profile) {
         return {
-          id: profile.sub,
-          name: profile.name,
+          id: String(profile.id),
+          name: profile.name || profile.login,
           email: profile.email,
-          image: profile.picture,
+          image: profile.avatar_url,
+          emailVerified: null,
         };
       },
     }),
@@ -54,22 +84,6 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    async signIn({ user, account }) {
-      if (account?.provider === "google" || account?.provider === "github") {
-        if (user.email) {
-          await prisma.user.updateMany({
-            where: {
-              email: user.email,
-              emailVerified: null,
-            },
-            data: {
-              emailVerified: new Date(),
-            },
-          });
-        }
-      }
-      return true;
-    },
     async jwt({ token, user, account, trigger, session }) {
       if (user) {
         token.id = user.id;
@@ -88,7 +102,6 @@ export const authOptions: NextAuthOptions = {
         token.refreshToken = account.refresh_token;
         token.expiresAt = account.expires_at;
       }
-
       return token;
     },
 
@@ -111,17 +124,6 @@ export const authOptions: NextAuthOptions = {
       if (url.startsWith("/")) return `${baseUrl}${url}`;
       if (new URL(url).origin === baseUrl) return url;
       return baseUrl;
-    },
-  },
-
-  events: {
-    async createUser({ user }) {
-      if (user.email) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { emailVerified: new Date() },
-        });
-      }
     },
   },
 
