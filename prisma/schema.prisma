@@ -14,50 +14,87 @@ datasource db {
 }
 
 model User {
-  id String @id @default(cuid())
-  email String @unique
-  password String? @map("password_hash") @db.VarChar(100)
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String?   @map("password_hash") @db.VarChar(100)
   emailVerified DateTime?
-  name String?
-  image String?
+  name          String?
+  image         String?
 
   accounts Account[]
   sessions Session[]
 
+  ownedPages Page[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("users")
 }
 
 model Account {
-  id String @id @default(cuid())
-  userId String
-  type String
-  provider String
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
   providerAccountId String
-  refresh_token String?
-  access_token String?
-  expires_at Int?
-  token_type String?
-  scope String?
-  id_token String?
-  session_state String?
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
   @@unique([provider, providerAccountId])
+  @@index([userId])
   @@map("accounts")
 }
 
 model Session {
-  id String @id @default(cuid())
-  userId String
-  sessionToken String @unique
-  expires DateTime
+  id           String   @id @default(cuid())
+  userId       String
+  sessionToken String   @unique
+  expires      DateTime
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("sessions")
+}
+
+model Page {
+  id         String  @id @default(cuid())
+  title      String  @default("Untitled")
+  icon       String?
+  coverImage String?
+  content    Json?
+
+  parentId String?
+  position Int     @default(0)
+
+  ownerId  String
+  isPublic Boolean @default(false)
+
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+  slug        String?   @unique
+
+  lastEditedBy String?
+
+  owner  User  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  parent Page? @relation("PageHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+
+  children Page[] @relation("PageHierarchy")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([parentId])
+  @@index([isPublished, slug])
+  @@index([position])
+  @@map("pages")
 }
