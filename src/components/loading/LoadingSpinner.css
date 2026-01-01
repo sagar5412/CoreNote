@@ -1,0 +1,114 @@
+/* Outer ring */
+.clock-outer {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Blue spinner rotating in the gap - fills entire gap */
+.spinner-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  border-top-color: rgb(29, 155, 240);
+  box-sizing: border-box;
+  animation: spinBorder 1s linear infinite;
+}
+
+@keyframes spinBorder {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Inner circle with clock */
+.clock-inner {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #374151;
+  background: transparent;
+}
+
+/* Center dot */
+.clock-inner::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background: #6366f1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+/* Hour Hand */
+.hand-hour {
+  position: absolute;
+  width: 2px;
+  height: 7px;
+  background: #9ca3af;
+  top: 50%;
+  left: 50%;
+  transform-origin: 50% 100%;
+  transform: translate(-50%, -100%);
+  border-radius: 1px;
+  animation: rotateHour 12s linear infinite;
+  z-index: 3;
+}
+
+/* Minute Hand */
+.hand-minute {
+  position: absolute;
+  width: 2px;
+  height: 10px;
+  background: #6366f1;
+  top: 50%;
+  left: 50%;
+  transform-origin: 50% 100%;
+  transform: translate(-50%, -100%);
+  border-radius: 1px;
+  animation: rotateMinute 4s linear infinite;
+  z-index: 4;
+}
+
+/* Second Hand - Fast rotation */
+.hand-second {
+  position: absolute;
+  width: 1px;
+  height: 12px;
+  background: #ef4444;
+  top: 50%;
+  left: 50%;
+  transform-origin: 50% 100%;
+  transform: translate(-50%, -100%);
+  border-radius: 1px;
+  animation: rotateSecond 1s linear infinite;
+  z-index: 5;
+}
+
+@keyframes rotateSecond {
+  from { transform: translate(-50%, -100%) rotate(0deg); }
+  to { transform: translate(-50%, -100%) rotate(360deg); }
+}
+
+@keyframes rotateMinute {
+  from { transform: translate(-50%, -100%) rotate(0deg); }
+  to { transform: translate(-50%, -100%) rotate(360deg); }
+}
+
+@keyframes rotateHour {
+  from { transform: translate(-50%, -100%) rotate(0deg); }
+  to { transform: translate(-50%, -100%) rotate(360deg); }
+}
