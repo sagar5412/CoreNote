@@ -9,7 +9,7 @@ import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { createPageSchema } from "@/lib/validators/page";
 import z from "zod";
-
+import { JsonNull } from "@prisma/client/runtime/client.js";
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -94,18 +94,16 @@ export async function POST(req: NextRequest) {
           title: validatedBody.title,
           icon: validatedBody.icon,
           coverImage: validatedBody.coverImage,
-          content: validatedBody.content ?? { blocks: [] },
+          content: validatedBody.content ?? JsonNull,
           ownerId: session.user.id,
           parentId: validatedBody.parentId ?? null,
           position: nextPosition,
-          lastEditedBy: session.user.id,
         },
         select: {
           id: true,
           title: true,
           icon: true,
           parentId: true,
-          ownerId: true,
           position: true,
         },
       });
@@ -115,6 +113,6 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return errorResponse("Invalid request data", 400);
     }
-    return errorResponse("Failed to create page", 500);
+    return errorResponse("Failed to create page", 500, error);
   }
 }
