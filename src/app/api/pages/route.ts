@@ -5,12 +5,12 @@ import {
   unauthorizedResponse,
 } from "@/lib/utils/api-response";
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { createPageSchema } from "@/lib/validators/page";
 import z from "zod";
 
-export async function GET(req: NextResponse) {
+export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -49,7 +49,7 @@ export async function GET(req: NextResponse) {
   }
 }
 
-export async function POST(req: NextResponse) {
+export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -73,32 +73,42 @@ export async function POST(req: NextResponse) {
       }
     }
 
-    const siblingCount = await prisma.page.count({
-      where: {
-        ownerId: session.user.id,
-        parentId: validatedBody.parentId || null,
-      },
-    });
+    const page = await prisma.$transaction(async (tx) => {
+      const lastSibling = await tx.page.findFirst({
+        where: {
+          ownerId: session.user.id,
+          parentId: validatedBody.parentId,
+        },
+        orderBy: {
+          position: "desc",
+        },
+        select: {
+          position: true,
+        },
+      });
 
-    const page = await prisma.page.create({
-      data: {
-        title: validatedBody.title,
-        icon: validatedBody.icon,
-        coverImage: validatedBody.coverImage,
-        content: validatedBody.content!,
-        ownerId: session.user.id,
-        parentId: validatedBody.parentId || null,
-        position: siblingCount,
-        lastEditedBy: session.user.id,
-      },
-      select: {
-        id: true,
-        title: true,
-        icon: true,
-        parentId: true,
-        ownerId: true,
-        position: true,
-      },
+      const nextPosition = lastSibling ? lastSibling.position + 1 : 0;
+
+      return await tx.page.create({
+        data: {
+          title: validatedBody.title,
+          icon: validatedBody.icon,
+          coverImage: validatedBody.coverImage,
+          content: validatedBody.content ?? { blocks: [] },
+          ownerId: session.user.id,
+          parentId: validatedBody.parentId ?? null,
+          position: nextPosition,
+          lastEditedBy: session.user.id,
+        },
+        select: {
+          id: true,
+          title: true,
+          icon: true,
+          parentId: true,
+          ownerId: true,
+          position: true,
+        },
+      });
     });
     return successResponse(page, 200);
   } catch (error) {
