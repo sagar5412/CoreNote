@@ -25,7 +25,6 @@ export const movePageSchema = z.object({
 });
 
 export const publishPageSchema = z.object({
-  pageId: z.string(),
   slug: z
     .string()
     .min(3)
