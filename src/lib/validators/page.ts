@@ -20,9 +20,8 @@ export const deletePageSchema = z.object({
 });
 
 export const movePageSchema = z.object({
-  pageId: z.string().nullable(),
-  parentId: z.string().nullable(),
-  position: z.number().int().min(0),
+  newParentId: z.string().nullable(),
+  newPosition: z.number().int().min(0),
 });
 
 export const publishPageSchema = z.object({
