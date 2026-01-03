@@ -1,9 +1,5 @@
-import {
-  errorResponse,
-  notFoundResponse,
-  successResponse,
-} from "@/lib/utils/api-response";
 import { NextRequest } from "next/server";
+import { successResponse } from "@/lib/utils/api-response";
 import prisma from "@/lib/prisma";
 import { JsonNull } from "@prisma/client/runtime/client";
 import { withErrorHandling } from "@/lib/utils/route-handler";
@@ -19,47 +15,42 @@ type RouteContext = {
 
 export const GET = withErrorHandling(
   async (req: NextRequest, context: RouteContext) => {
-    try {
-      const session = await requireSession();
+    const session = await requireSession();
 
-      const { pageId } = await context.params;
+    const { pageId } = await context.params;
 
-      if (!pageId) {
-        return notFoundResponse("Page not found");
-      }
-      const page = await prisma.page.findFirst({
-        where: {
-          id: pageId,
-          OR: [{ ownerId: session.user.id }, { isPublished: true }],
-        },
-        select: {
-          id: true,
-          title: true,
-          icon: true,
-          content: true,
-          parentId: true,
-          position: true,
-          isPublished: true,
-          slug: true,
-          parent: {
-            select: {
-              id: true,
-              title: true,
-              icon: true,
-            },
+    if (!pageId) {
+      throw new NotFoundError("Page not found");
+    }
+    const page = await prisma.page.findFirst({
+      where: {
+        id: pageId,
+        OR: [{ ownerId: session.user.id }, { isPublished: true }],
+      },
+      select: {
+        id: true,
+        title: true,
+        icon: true,
+        content: true,
+        parentId: true,
+        position: true,
+        isPublished: true,
+        slug: true,
+        parent: {
+          select: {
+            id: true,
+            title: true,
+            icon: true,
           },
         },
-      });
+      },
+    });
 
-      if (!page) {
-        return notFoundResponse("Page not found");
-      }
-
-      return successResponse(page, 200);
-    } catch (error) {
-      console.error(error);
-      return errorResponse("Failed to fetch page", 500);
+    if (!page) {
+      throw new NotFoundError("Page not found");
     }
+
+    return successResponse(page, 200);
   }
 );
 
@@ -102,14 +93,11 @@ export const DELETE = withErrorHandling(
       where: { id: pageId },
       select: { ownerId: true },
     });
-
     if (!page) throw new NotFoundError("Page not found");
     if (page.ownerId !== session.user.id) throw new ForbiddenError();
-
     await prisma.page.delete({
       where: { id: pageId },
     });
-
     return successResponse(true, 200);
   }
 );
