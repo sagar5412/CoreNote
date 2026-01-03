@@ -1,22 +1,14 @@
-import { authOptions } from "@/lib/auth";
-import {
-  errorResponse,
-  successResponse,
-  unauthorizedResponse,
-} from "@/lib/utils/api-response";
-import { getServerSession } from "next-auth";
+import { errorResponse, successResponse } from "@/lib/utils/api-response";
 import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { createPageSchema } from "@/lib/validators/page";
 import z from "zod";
 import { JsonNull } from "@prisma/client/runtime/client.js";
-export async function GET(req: NextRequest) {
+import { requireSession } from "@/lib/auth/require-session";
+import { withErrorHandling } from "@/lib/utils/route-handler";
+export const GET = withErrorHandling(async (req: NextRequest) => {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return unauthorizedResponse();
-    }
+    const session = await requireSession();
     const { searchParams } = new URL(req.url);
     const parentIdParam = searchParams.get("parentId");
 
@@ -47,15 +39,11 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     return errorResponse("Failed to fetch pages", 500);
   }
-}
+});
 
-export async function POST(req: NextRequest) {
+export const POST = withErrorHandling(async (req: NextRequest) => {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return unauthorizedResponse();
-    }
+    const session = await requireSession();
 
     const body = await req.json();
     const validatedBody = createPageSchema.parse(body);
@@ -108,11 +96,11 @@ export async function POST(req: NextRequest) {
         },
       });
     });
-    return successResponse(page, 200);
+    return successResponse(page, 201);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return errorResponse("Invalid request data", 400);
     }
     return errorResponse("Failed to create page", 500, error);
   }
-}
+});
