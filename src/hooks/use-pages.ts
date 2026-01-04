@@ -27,16 +27,34 @@ export function useUpdatePage(pageId: string) {
   return useMutation({
     mutationFn: (data: { title?: string; content?: JSON }) =>
       updatePage(pageId, data),
-    onSuccess: (_, variables) => {
-      queryClient.setQueryData(["page", pageId], (old: any) => {
-        old
-          ? {
-              ...old,
-              ...variables,
-            }
-          : old;
+    onSuccess: (updatePage, variables) => {
+      queryClient.setQueryData(["page", pageId], (old: any) =>
+        old ? { ...old, ...variables } : old
+      );
+
+      const parentId = updatePage.parentId ?? null;
+
+      queryClient.setQueryData(["pages", parentId], (cached: any) => {
+        if (!cached) return cached;
+
+        if (Array.isArray(cached)) {
+          return cached.map((p) =>
+            p.id === pageId ? { ...p, ...variables } : p
+          );
+        }
+
+        if (cached.items) {
+          return {
+            ...cached,
+            items: cached.items.map((p: any) =>
+              p.id === pageId ? { ...p, ...variables } : p
+            ),
+          };
+        }
+        return cached;
       });
     },
+
     onError: () => {
       queryClient.invalidateQueries({
         queryKey: ["page", pageId],

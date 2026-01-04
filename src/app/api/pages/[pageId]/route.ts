@@ -67,7 +67,7 @@ export const PUT = withErrorHandling(
 
     if (!page) throw new NotFoundError("Page not found");
     if (page.ownerId !== session.user.id) throw new ForbiddenError();
-    await prisma.page.update({
+    const updatedPage = await prisma.page.update({
       where: { id: pageId },
       data: {
         ...(body.title !== undefined && { title: body.title }),
@@ -79,9 +79,19 @@ export const PUT = withErrorHandling(
           content: body.content ?? JsonNull,
         }),
       },
+      select: {
+        id: true,
+        title: true,
+        icon: true,
+        content: true,
+        parentId: true,
+        position: true,
+        isPublished: true,
+        slug: true,
+      },
     });
 
-    return successResponse(true, 200);
+    return successResponse(updatedPage, 200);
   }
 );
 

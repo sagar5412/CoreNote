@@ -50,11 +50,11 @@ export function updatePage(
     content?: any;
   }
 ) {
-  return apiRequest<void>(`/api/pages/${pageId}`, "PUT", data);
+  return apiRequest<PageDetail>(`/api/pages/${pageId}`, "PUT", data);
 }
 
 export function deletePage(pageId: string) {
-  return apiRequest<void>(`/api/pages/${pageId}`, "DELETE");
+  return apiRequest<PageDetail>(`/api/pages/${pageId}`, "DELETE");
 }
 
 export function movePage(
@@ -64,7 +64,7 @@ export function movePage(
     newPosition: number;
   }
 ) {
-  return apiRequest<void>(`/api/pages/${pageId}/move`, "POST", data);
+  return apiRequest<PageDetail>(`/api/pages/${pageId}/move`, "POST", data);
 }
 
 export function duplicatePage(pageId: string) {
@@ -81,5 +81,5 @@ export function publishPage(
     isPublished: boolean;
   }
 ) {
-  return apiRequest<void>(`/api/pages/${pageId}/publish`, "POST", data);
+  return apiRequest<PageDetail>(`/api/pages/${pageId}/publish`, "POST", data);
 }
