@@ -1,6 +1,5 @@
-import { LoadingSkeleton } from "@/components/loading/LoadingSkeleton";
-import { LoadingSpinner } from "@/components/loading/LoadingSpinner";
+import { ThreeDotsLoader } from "@/components/loading/ThreeDotsLoader";
 
 export default function Loading() {
-  return <LoadingSpinner />;
+  return <ThreeDotsLoader />;
 }
