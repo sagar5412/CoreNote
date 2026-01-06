@@ -10,6 +10,10 @@ export function useRootPages() {
   return useQuery<PageListItem[]>({
     queryKey: ["pages", null],
     queryFn: () => getPages(null),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: "always",
   });
 }
 
@@ -18,6 +22,9 @@ export function useChildPages(parentId: string, enabled: boolean) {
     queryKey: ["pages", parentId],
     queryFn: () => getChildren(parentId),
     enabled,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 }
 

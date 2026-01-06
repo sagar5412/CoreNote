@@ -17,19 +17,24 @@ export function useCreatePage(parentId?: string | null) {
 
     onSuccess: (page) => {
       queryClient.setQueryData(["pages", parentId ?? null], (cached: any) => {
-        if (!cached) return [page];
-
-        if (Array.isArray(cached)) {
-          return [...cached, page];
+        if (parentId === null || parentId) {
+          if (!cached) return [page];
+          if (Array.isArray(cached)) {
+            return [...cached, page];
+          }
         }
+        if (!cached) return { items: [page], nextCursor: null };
+
         if (cached.items) {
           return {
             ...cached,
             items: [...cached.items, page],
           };
         }
+
         return cached;
       });
+      queryClient.setQueryData(["pages", page.id], page);
       router.push(`/${page.id}`);
     },
     onSettled: (data, error) => {
