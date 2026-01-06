@@ -12,23 +12,36 @@ export function useCreatePage(parentId?: string | null) {
         title: data?.title,
         parentId: parentId ?? null,
       }),
+    retry: 5,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
 
     onSuccess: (page) => {
+      queryClient.setQueryData(["pages", parentId ?? null], (cached: any) => {
+        if (!cached) return [page];
+
+        if (Array.isArray(cached)) {
+          return [...cached, page];
+        }
+        if (cached.items) {
+          return {
+            ...cached,
+            items: [...cached.items, page],
+          };
+        }
+        return cached;
+      });
+      router.push(`/${page.id}`);
+    },
+    onSettled: (data, error) => {
+      if (error) {
+        console.error("Failed to save after retries:", error);
+      }
       queryClient.invalidateQueries({
         queryKey: ["pages", parentId ?? null],
       });
-      queryClient.setQueryData(["page", page.id], {
-        id: page.id,
-        title: page.title,
-        icon: page.icon,
-        content: null,
-        parentId: page.parentId,
-        position: page.position,
-        isPublished: false,
-        slug: null,
-      });
-
-      router.push(`/${page.id}`);
+    },
+    onError: (error) => {
+      console.error("Failed to save after retries:", error);
     },
   });
 }
