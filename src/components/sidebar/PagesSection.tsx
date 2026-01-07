@@ -4,7 +4,7 @@ import { PageNode } from "./PageNode";
 import { PageActions } from "./PageAction";
 import clsx from "clsx";
 import { useCreatePage } from "@/hooks/use-create-page";
-
+import "./PageScrollBar.css";
 export function PagesSection() {
   const { data, isLoading } = useRootPages();
   const createPage = useCreatePage(null);
@@ -17,7 +17,7 @@ export function PagesSection() {
   };
 
   return (
-    <div>
+    <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin">
       <nav className="space-y-1 p-2">
         {isLoading && (
           <div>
