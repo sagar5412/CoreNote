@@ -1,4 +1,3 @@
-// src/components/sidebar/PageNode.tsx
 "use client";
 
 import Link from "next/link";

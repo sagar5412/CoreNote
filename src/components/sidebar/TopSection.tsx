@@ -8,7 +8,13 @@ import { useCreatePage } from "@/hooks/use-create-page";
 import { useRouter } from "next/navigation";
 import { MoreSettings } from "./MoreSettings";
 
-export function TopSection() {
+export function TopSection({
+  onClose,
+  isHovering,
+}: {
+  onClose: () => void;
+  isHovering?: boolean;
+}) {
   const router = useRouter();
   const session = useSession();
   const name = session.data?.user.name;
@@ -49,13 +55,29 @@ export function TopSection() {
         </div>
       </div>
 
-      <div className="flex items-center text-muted-foreground opacity-0 transition-opacity group-hover/sidebar:opacity-100">
+      <div
+        className={` ${
+          isHovering
+            ? "opacity-0"
+            : "flex items-center text-muted-foreground opacity-0 transition-opacity group-hover/sidebar:opacity-100"
+        }`}
+      >
         <Tooltip>
-          <TooltipTrigger className="flex items-center hover:bg-[rgba(88,87,87,0.1)] rounded">
+          <TooltipTrigger
+            className="flex items-center hover:bg-[rgba(88,87,87,0.1)] rounded"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+          >
             <DoubleDownArrowLeft />
           </TooltipTrigger>
-          <TooltipContent className="bg-gray-800 text-white">
-            <p>close sidebar</p>
+          <TooltipContent
+            className={` ${
+              isHovering ? "opacity-0" : "bg-gray-800 text-white opacity-100"
+            }`}
+          >
+            <p>Close sidebar</p>
           </TooltipContent>
         </Tooltip>
       </div>
