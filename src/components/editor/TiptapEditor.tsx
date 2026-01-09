@@ -4,7 +4,7 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { slashCommands } from "./SlashCommands";
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 // Custom extensions
 import { CustomHeading } from "./extensions/CustomHeading";
@@ -17,6 +17,7 @@ import {
 
 export function TiptapEditor({ value, onChange }: any) {
   const [showSlash, setShowSlash] = useState(false);
+  const isInternalUpdate = useRef(false);
 
   const editor = useEditor({
     extensions: [
@@ -44,6 +45,7 @@ export function TiptapEditor({ value, onChange }: any) {
       },
     },
     onUpdate({ editor }) {
+      isInternalUpdate.current = true;
       onChange(editor.getJSON());
 
       const { from } = editor.state.selection;
@@ -55,6 +57,20 @@ export function TiptapEditor({ value, onChange }: any) {
       setShowSlash(textBefore === "/");
     },
   });
+
+  // Only sync when value changes from EXTERNAL source (e.g., initial load)
+  useEffect(() => {
+    if (editor && value && !isInternalUpdate.current) {
+      const currentContent = JSON.stringify(editor.getJSON());
+      const newContent = JSON.stringify(value);
+
+      if (currentContent !== newContent) {
+        editor.commands.setContent(value, { emitUpdate: false });
+      }
+    }
+    // Reset the flag after this effect runs
+    isInternalUpdate.current = false;
+  }, [editor, value]);
 
   if (!editor) return null;
 

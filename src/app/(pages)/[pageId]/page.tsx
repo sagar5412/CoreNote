@@ -58,7 +58,9 @@ export default function PageEditor() {
         placeholder="Untitled"
         className="w-full text-4xl font-bold outline-none"
       />
-      <TiptapEditor value={content} onChange={setContent} />
+      {content !== null && (
+        <TiptapEditor value={content} onChange={setContent} />
+      )}
     </div>
   );
 }
