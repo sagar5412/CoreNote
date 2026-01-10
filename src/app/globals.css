@@ -124,3 +124,29 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Tiptap Editor Base Styles */
+.ProseMirror {
+  outline: none;
+  caret-color: #000;
+  min-height: 300px;
+  cursor: text;
+}
+
+.dark .ProseMirror {
+  caret-color: #fff;
+}
+
+.ProseMirror:focus {
+  outline: none;
+}
+
+/* Placeholder for empty paragraphs - classes are on <p>, not .ProseMirror */
+.ProseMirror p.is-editor-empty::before,
+.ProseMirror p.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+}

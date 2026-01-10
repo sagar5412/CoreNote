@@ -76,7 +76,7 @@ export const PUT = withErrorHandling(
           coverImage: body.coverImage,
         }),
         ...(body.content !== undefined && {
-          content: body.content ?? JsonNull,
+          content: body.content ? JSON.stringify(body.content) : JsonNull,
         }),
       },
       select: {

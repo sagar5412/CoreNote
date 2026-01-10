@@ -9,7 +9,7 @@ import {
 const BulletListComponent = () => {
   return (
     <NodeViewWrapper>
-      <ul className="list-disc pl-6 my-2 space-y-1">
+      <ul className="list-disc [&_ul]:list-[circle] [&_ul_ul]:list-[square] pl-6 my-2 space-y-1">
         <NodeViewContent />
       </ul>
     </NodeViewWrapper>

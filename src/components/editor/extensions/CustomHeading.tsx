@@ -1,4 +1,3 @@
-import { mergeAttributes } from "@tiptap/core";
 import Heading from "@tiptap/extension-heading";
 import {
   ReactNodeViewRenderer,
@@ -8,21 +7,24 @@ import {
 import { Heading as RadixHeading } from "@radix-ui/themes";
 
 const HeadingComponent = ({ node }: any) => {
-  const level = node.attrs.level as 1 | 2 | 3 | 4 | 5 | 6;
+  const level = node.attrs.level as 1 | 2 | 3;
 
-  // Map Tiptap levels to Radix sizes
-  const sizeMap: Record<number, "9" | "8" | "7" | "6" | "5" | "4"> = {
-    1: "9",
-    2: "8",
-    3: "7",
-    4: "6",
-    5: "5",
-    6: "4",
+  const sizeMap: Record<number, string> = {
+    1: "1.875rem",
+    2: "1.5rem",
+    3: "1.25rem",
   };
 
   return (
     <NodeViewWrapper>
-      <RadixHeading as={`h${level}`} size={sizeMap[level]} className="my-2">
+      <RadixHeading
+        as={`h${level}`}
+        style={{
+          fontSize: sizeMap[level],
+          fontWeight: 500,
+          margin: "0.5rem 0",
+        }}
+      >
         <NodeViewContent />
       </RadixHeading>
     </NodeViewWrapper>
