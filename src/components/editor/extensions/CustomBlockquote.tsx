@@ -18,6 +18,8 @@ const BlockquoteComponent = () => {
 
 export const CustomBlockquote = Blockquote.extend({
   addNodeView() {
-    return ReactNodeViewRenderer(BlockquoteComponent);
+    return ReactNodeViewRenderer(BlockquoteComponent, {
+      className: "custom-blockquote-node",
+    });
   },
 });

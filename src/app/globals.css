@@ -151,7 +151,7 @@
   height: 0;
 }
 
-/* Target custom heading placeholders */
+/* custom heading placeholders */
 .tiptap .custom-heading-node.is-empty::before,
 .tiptap .ProseMirror div.is-empty[data-placeholder]::before {
   content: attr(data-placeholder);
@@ -175,4 +175,30 @@
 }
 .tiptap .custom-heading-node[data-level="3"].is-empty::before {
   font-size: 1.5rem;
+}
+
+/* Blockquote placeholder */
+.tiptap .custom-blockquote-node.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+  user-select: none;
+  font-style: italic;
+  opacity: 0.75;
+}
+
+/* Bullet list placeholder */
+.tiptap li p.is-empty::before,
+.tiptap .custom-listitem-node p.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+  user-select: none;
+  opacity: 0.75;
+  font-size: inherit;
+  line-height: 1.4;
 }

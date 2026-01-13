@@ -26,12 +26,16 @@ const ListItemComponent = () => {
 
 export const CustomBulletList = BulletList.extend({
   addNodeView() {
-    return ReactNodeViewRenderer(BulletListComponent);
+    return ReactNodeViewRenderer(BulletListComponent, {
+      className: "custom-bulletlist-node",
+    });
   },
 });
 
 export const CustomListItem = ListItem.extend({
   addNodeView() {
-    return ReactNodeViewRenderer(ListItemComponent);
+    return ReactNodeViewRenderer(ListItemComponent, {
+      className: "custom-listitem-node",
+    });
   },
 });

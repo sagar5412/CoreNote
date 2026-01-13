@@ -47,7 +47,7 @@ export const TiptapEditor = forwardRef<TiptapEditorRef, any>(
         CustomBulletList,
         CustomListItem,
         Placeholder.configure({
-          placeholder: ({ node }) => {
+          placeholder: ({ editor: tipEditor, node }) => {
             if (node.type.name === "heading") {
               const level = node.attrs.level;
               if (level === 1) return "Heading 1";
@@ -55,10 +55,22 @@ export const TiptapEditor = forwardRef<TiptapEditorRef, any>(
               if (level === 3) return "Heading 3";
               return `Heading ${level}`;
             }
+            if (node.type.name === "blockquote") {
+              return "Quote...";
+            }
+            if (
+              node.type.name === "paragraph" &&
+              tipEditor.isActive("bulletList")
+            ) {
+              return "List item...";
+            }
             return "Type / for commands...";
           },
           showOnlyWhenEditable: true,
           emptyEditorClass: "is-empty",
+          emptyNodeClass: "is-empty",
+          includeChildren: false,
+          showOnlyCurrent: false,
         }),
       ],
       content: value,
