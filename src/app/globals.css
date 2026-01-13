@@ -150,3 +150,29 @@
   pointer-events: none;
   height: 0;
 }
+
+/* Target custom heading placeholders */
+.tiptap .custom-heading-node.is-empty::before,
+.tiptap .ProseMirror div.is-empty[data-placeholder]::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+  user-select: none;
+
+  font-size: 1.5em;
+  line-height: 1.35;
+  font-weight: inherit;
+  opacity: 0.75;
+}
+
+.tiptap .custom-heading-node[data-level="1"].is-empty::before {
+  font-size: 2.2rem;
+}
+.tiptap .custom-heading-node[data-level="2"].is-empty::before {
+  font-size: 1.8rem;
+}
+.tiptap .custom-heading-node[data-level="3"].is-empty::before {
+  font-size: 1.5rem;
+}

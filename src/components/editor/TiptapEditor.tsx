@@ -47,8 +47,18 @@ export const TiptapEditor = forwardRef<TiptapEditorRef, any>(
         CustomBulletList,
         CustomListItem,
         Placeholder.configure({
-          placeholder: "Type / for commands...",
-          emptyEditorClass: "is-editor-empty",
+          placeholder: ({ node }) => {
+            if (node.type.name === "heading") {
+              const level = node.attrs.level;
+              if (level === 1) return "Heading 1";
+              if (level === 2) return "Heading 2";
+              if (level === 3) return "Heading 3";
+              return `Heading ${level}`;
+            }
+            return "Type / for commands...";
+          },
+          showOnlyWhenEditable: true,
+          emptyEditorClass: "is-empty",
         }),
       ],
       content: value,

@@ -19,11 +19,11 @@ export const slashCommands = [
     command: (editor: any) => editor.chain().focus().toggleBulletList().run(),
   },
   {
-    title: "Blockquote",
+    title: "Quote",
     command: (editor: any) => editor.chain().focus().toggleBlockquote().run(),
   },
   {
-    title: "Code Block",
+    title: "Code",
     command: (editor: any) =>
       editor.chain().focus().setCodeBlock({ language: "javascript" }).run(),
   },

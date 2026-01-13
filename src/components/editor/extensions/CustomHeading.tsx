@@ -33,7 +33,18 @@ const HeadingComponent = ({ node }: any) => {
 
 export const CustomHeading = Heading.extend({
   addNodeView() {
-    return ReactNodeViewRenderer(HeadingComponent);
+    return ReactNodeViewRenderer(HeadingComponent, {
+      className: "custom-heading-node",
+    });
+  },
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      level: {
+        default: 1,
+        rendered: true,
+      },
+    };
   },
 }).configure({
   levels: [1, 2, 3],
