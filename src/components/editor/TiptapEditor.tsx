@@ -70,7 +70,7 @@ export const TiptapEditor = forwardRef<TiptapEditorRef, any>(
           emptyEditorClass: "is-empty",
           emptyNodeClass: "is-empty",
           includeChildren: false,
-          showOnlyCurrent: false,
+          showOnlyCurrent: true,
         }),
       ],
       content: value,

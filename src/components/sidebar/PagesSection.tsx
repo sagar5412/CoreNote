@@ -12,10 +12,6 @@ export function PagesSection() {
     createPage.mutate({ title: "Untitled" });
   };
 
-  const handleOpenMenu = () => {
-    console.log("Open menu for:", "root");
-  };
-
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin">
       <nav className="space-y-1 p-2">
@@ -31,7 +27,6 @@ export function PagesSection() {
           )}
         >
           <div className="text-xs font-medium py-0.5">Private</div>
-          <PageActions onAddChild={handleAddPage} onOpenMenu={handleOpenMenu} />
         </div>
 
         {data?.map((page) => (

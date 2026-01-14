@@ -37,7 +37,7 @@ export function MoreSettings() {
             <p>More settings</p>
           </TooltipContent>
         </Tooltip>
-        <DropdownMenuContent className="w-34">
+        <DropdownMenuContent className="w-34 p-1">
           <DropdownMenuGroup>
             <DropdownMenuItem>
               <FileText />

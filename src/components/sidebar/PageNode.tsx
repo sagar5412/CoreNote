@@ -35,11 +35,6 @@ export function PageNode({ page, level }: Props) {
     createChildPage.mutate({ title: "Untitled" });
   };
 
-  const handleOpenMenu = () => {
-    // TODO: Open dropdown menu
-    console.log("Open menu for:", page.id);
-  };
-
   return (
     <div>
       <div
@@ -64,7 +59,11 @@ export function PageNode({ page, level }: Props) {
           <Link href={`/${page.id}`}>{page.title}</Link>
         </div>
 
-        <PageActions onAddChild={handleAddChild} onOpenMenu={handleOpenMenu} />
+        <PageActions
+          onAddChild={handleAddChild}
+          pageId={page.id}
+          pageTitle={page.title}
+        />
       </div>
 
       {expanded && (

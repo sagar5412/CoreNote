@@ -39,7 +39,11 @@ export function getChildren(pageId: string) {
 }
 
 /* Mutations */
-export function createPage(data: { title?: string; parentId?: string | null }) {
+export function createPage(data: {
+  title?: string;
+  parentId?: string | null;
+  content?: JSON;
+}) {
   return apiRequest<PageListItem>("/api/pages", "POST", data);
 }
 
