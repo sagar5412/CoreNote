@@ -7,8 +7,12 @@ const DELETED_PAGE_KEY = ["_deleted_page"];
 type DeletedPageData = {
   page: PageDetail;
   parentId: string | null;
-  descendants: (PageListItem & { content?: any })[];
+  descendants: RestorablePage[];
   deletedAt: number;
+};
+
+type RestorablePage = PageListItem & {
+  content?: PageDetail["content"];
 };
 
 export function useRestorePage() {
@@ -17,73 +21,71 @@ export function useRestorePage() {
 
   return useMutation({
     mutationFn: async () => {
-      const deletedData =
+      const deleted =
         queryClient.getQueryData<DeletedPageData>(DELETED_PAGE_KEY);
 
-      if (!deletedData) {
+      if (!deleted) {
         throw new Error("No page to restore");
       }
 
-      const { page, parentId, descendants } = deletedData;
+      const { page, parentId, descendants } = deleted;
 
-      // Map old IDs to new IDs for parent-child relationships
+      // oldId -> newId
       const idMap = new Map<string, string>();
 
-      // 1. Restore the parent page first
-      const restoredParent = await createPage({
+      // STEP 1: Restore root page first
+      const restoredRoot = await createPage({
         title: page.title || "Untitled",
-        parentId: parentId,
-        content: page.content || null,
-      });
-      idMap.set(page.id, restoredParent.id);
-
-      // 2. Restore children in order (parents before children)
-      // Sort by depth (pages with parentId matching the deleted page first)
-      const sortedDescendants = [...descendants].sort((a, b) => {
-        const aDepth = getDepth(a.parentId, page.id, descendants);
-        const bDepth = getDepth(b.parentId, page.id, descendants);
-        return aDepth - bDepth;
+        parentId,
+        content: page.content ?? null,
       });
 
-      for (const child of sortedDescendants) {
-        // Get the new parent ID from the map
-        const newParentId = child.parentId ? idMap.get(child.parentId) : null;
+      idMap.set(page.id, restoredRoot.id);
 
-        const restoredChild = await createPage({
-          title: child.title || "Untitled",
-          parentId: newParentId || restoredParent.id, // Fallback to restored parent
-          content: child.content || null,
-        });
+      // STEP 2: Build parent -> children map
+      const childrenMap = new Map<string, RestorablePage[]>();
 
-        idMap.set(child.id, restoredChild.id);
+      for (const d of descendants) {
+        const pid = d.parentId ?? page.id;
+
+        if (!childrenMap.has(pid)) {
+          childrenMap.set(pid, []);
+        }
+
+        childrenMap.get(pid)!.push(d);
       }
 
-      return { restoredPage: restoredParent, parentId };
+      // STEP 3: DFS restore
+      async function restoreDFS(oldParentId: string, newParentId: string) {
+        const children = childrenMap.get(oldParentId);
+        if (!children) return;
+
+        for (const child of children) {
+          const restored = await createPage({
+            title: child.title || "Untitled",
+            parentId: newParentId,
+            content: child.content ?? null,
+          });
+
+          idMap.set(child.id, restored.id);
+          await restoreDFS(child.id, restored.id);
+        }
+      }
+
+      await restoreDFS(page.id, restoredRoot.id);
+
+      return { restoredPage: restoredRoot };
     },
 
-    onSuccess: ({ restoredPage, parentId }) => {
-      // Clear deleted page from cache
+    onSuccess: ({ restoredPage }) => {
+      // Clear undo snapshot
       queryClient.removeQueries({ queryKey: DELETED_PAGE_KEY });
 
-      // Invalidate pages to refresh the sidebar
+      // Refresh sidebar
       queryClient.invalidateQueries({ queryKey: ["pages"] });
 
       // Navigate to restored page
       router.push(`/${restoredPage.id}`);
     },
   });
-}
-
-// Helper to calculate depth of a page in the tree
-function getDepth(
-  parentId: string | null | undefined,
-  rootId: string,
-  descendants: PageListItem[]
-): number {
-  if (!parentId || parentId === rootId) return 0;
-
-  const parent = descendants.find((d) => d.id === parentId);
-  if (!parent) return 0;
-
-  return 1 + getDepth(parent.parentId, rootId, descendants);
 }
