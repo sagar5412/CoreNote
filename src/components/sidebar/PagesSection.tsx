@@ -13,7 +13,7 @@ export function PagesSection() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin">
+    <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin hover:border-t">
       <nav className="space-y-1 p-2">
         {isLoading && (
           <div>

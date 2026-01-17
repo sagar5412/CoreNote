@@ -33,7 +33,7 @@ export function useRestorePage() {
       // oldId -> newId
       const idMap = new Map<string, string>();
 
-      // STEP 1: Restore root page first
+      // Restore root page first
       const restoredRoot = await createPage({
         title: page.title || "Untitled",
         parentId,
@@ -42,7 +42,7 @@ export function useRestorePage() {
 
       idMap.set(page.id, restoredRoot.id);
 
-      // STEP 2: Build parent -> children map
+      // Build parent -> children map
       const childrenMap = new Map<string, RestorablePage[]>();
 
       for (const d of descendants) {
@@ -55,9 +55,10 @@ export function useRestorePage() {
         childrenMap.get(pid)!.push(d);
       }
 
-      // STEP 3: DFS restore
+      // DFS restore
       async function restoreDFS(oldParentId: string, newParentId: string) {
         const children = childrenMap.get(oldParentId);
+        console.log("children", children);
         if (!children) return;
 
         for (const child of children) {

@@ -187,6 +187,7 @@
   user-select: none;
   font-style: italic;
   opacity: 0.75;
+  margin-left: 1rem;
 }
 
 /* Bullet list placeholder */

@@ -3,7 +3,7 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
-import { slashCommands } from "./SlashCommands";
+import { SlashCommandMenu } from "./SlashCommandMenu";
 import {
   useEffect,
   useState,
@@ -27,7 +27,16 @@ export interface TiptapEditorRef {
 
 export const TiptapEditor = forwardRef<TiptapEditorRef, any>(
   ({ value, onChange }, ref) => {
-    const [showSlash, setShowSlash] = useState(false);
+    const [slashMenu, setSlashMenu] = useState<{
+      show: boolean;
+      query: string;
+      position: { top: number; left: number };
+    }>({
+      show: false,
+      query: "",
+      position: { top: 0, left: 0 },
+    });
+
     const [showPlaceholder, setShowPlaceholder] = useState(true);
     const isInternalUpdate = useRef(false);
     const editorContainerRef = useRef<HTMLDivElement>(null);
@@ -69,7 +78,7 @@ export const TiptapEditor = forwardRef<TiptapEditorRef, any>(
           showOnlyWhenEditable: true,
           emptyEditorClass: "is-empty",
           emptyNodeClass: "is-empty",
-          includeChildren: false,
+          includeChildren: true,
           showOnlyCurrent: true,
         }),
       ],
@@ -78,6 +87,14 @@ export const TiptapEditor = forwardRef<TiptapEditorRef, any>(
       editorProps: {
         attributes: {
           class: "outline-none focus:outline-none min-h-[300px] cursor-text",
+        },
+        handleKeyDown: (view, event) => {
+          // If slash menu is open and Enter is pressed, don't create new paragraph
+          if (slashMenu.show && event.key === "Enter") {
+            event.preventDefault();
+            return true;
+          }
+          return false;
         },
       },
       onUpdate({ editor }) {
@@ -91,14 +108,36 @@ export const TiptapEditor = forwardRef<TiptapEditorRef, any>(
         const isParagraph = currentNode.type.name === "paragraph";
         setShowPlaceholder(isEmpty && isParagraph);
 
-        // Slash command detection
+        // Slash command detection with query extraction
         const { from } = editor.state.selection;
-        const textBefore = editor.state.doc.textBetween(
-          Math.max(0, from - 1),
+        const textFromLineStart = editor.state.doc.textBetween(
+          $from.start(),
           from,
           "\n"
         );
-        setShowSlash(textBefore === "/");
+
+        // Check if there's a "/" in the current line
+        const slashIndex = textFromLineStart.lastIndexOf("/");
+
+        if (slashIndex !== -1) {
+          const query = textFromLineStart.slice(slashIndex + 1); // Text after "/"
+
+          // Get cursor position for menu placement
+          const coords = editor.view.coordsAtPos(from);
+          const containerRect =
+            editorContainerRef.current?.getBoundingClientRect();
+
+          setSlashMenu({
+            show: true,
+            query,
+            position: {
+              top: coords.bottom - (containerRect?.top ?? 0) + 8,
+              left: coords.left - (containerRect?.left ?? 0),
+            },
+          });
+        } else {
+          setSlashMenu((prev) => ({ ...prev, show: false }));
+        }
       },
       onSelectionUpdate({ editor }) {
         // Check placeholder on cursor move
@@ -109,6 +148,20 @@ export const TiptapEditor = forwardRef<TiptapEditorRef, any>(
         setShowPlaceholder(isEmpty && isParagraph);
       },
     });
+
+    // Close menu on blur
+    useEffect(() => {
+      const handleBlur = () => {
+        setTimeout(() => {
+          setSlashMenu((prev) => ({ ...prev, show: false }));
+        }, 150); // Small delay to allow click events
+      };
+
+      editor?.on("blur", handleBlur);
+      return () => {
+        editor?.off("blur", handleBlur);
+      };
+    }, [editor]);
 
     // Expose focus method to parent
     useImperativeHandle(ref, () => ({
@@ -124,7 +177,9 @@ export const TiptapEditor = forwardRef<TiptapEditorRef, any>(
         const newContent = JSON.stringify(value);
 
         if (currentContent !== newContent) {
-          editor.commands.setContent(value, { emitUpdate: false });
+          requestAnimationFrame(() => {
+            editor.commands.setContent(value, { emitUpdate: false });
+          });
         }
       }
       isInternalUpdate.current = false;
@@ -145,26 +200,13 @@ export const TiptapEditor = forwardRef<TiptapEditorRef, any>(
         className="relative min-h-[300px] cursor-text"
         onClick={handleContainerClick}
       >
-        {showSlash && (
-          <div className="absolute z-10 bg-background border rounded shadow p-1">
-            {slashCommands.map((item) => (
-              <button
-                key={item.title}
-                className="block px-2 py-1 text-sm hover:bg-muted"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  editor.commands.deleteRange({
-                    from: editor.state.selection.from - 1,
-                    to: editor.state.selection.from,
-                  });
-                  item.command(editor);
-                  setShowSlash(false);
-                }}
-              >
-                {item.title}
-              </button>
-            ))}
-          </div>
+        {slashMenu.show && (
+          <SlashCommandMenu
+            editor={editor}
+            query={slashMenu.query}
+            position={slashMenu.position}
+            onClose={() => setSlashMenu((prev) => ({ ...prev, show: false }))}
+          />
         )}
 
         <EditorContent editor={editor} className="text-[#2C2C2B]" />

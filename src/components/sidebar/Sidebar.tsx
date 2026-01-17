@@ -77,15 +77,15 @@ export function Sidebar() {
         // OPEN STATE: Full height sidebar
         <div className="group/sidebar w-[236.938px] h-screen bg-[#F9F8F7] py-[6px] flex flex-col relative overflow-hidden pb-0">
           <TopSection onClose={() => setIsOpen(false)} />
-          <div className="flex flex-col px-[8px]">
+          {/* <div className="flex flex-col px-[8px]">
             <div>Search</div>
             <div>Home</div>
             <div>Meetings</div>
-          </div>
+          </div> */}
           <PagesSection />
-          <div className="h-[48px] max-h-[48px] border-t flex-shrink-0">
+          {/* <div className="h-[48px] max-h-[48px] border-t flex-shrink-0">
             page info
-          </div>
+          </div> */}
         </div>
       ) : (
         // CLOSED STATE: Floating sidebar (10% from top, 20% from bottom)
@@ -118,15 +118,15 @@ export function Sidebar() {
             onClose={() => setIsOpen(false)}
             isHovering={isHovering}
           />
-          <div className="flex flex-col px-[8px]">
+          {/* <div className="flex flex-col px-[8px]">
             <div>Search</div>
             <div>Home</div>
             <div>Meetings</div>
-          </div>
+          </div> */}
           <PagesSection />
-          <div className="h-[48px] max-h-[48px] border-t flex-shrink-0">
+          {/* <div className="h-[48px] max-h-[48px] border-t flex-shrink-0">
             page info
-          </div>
+          </div> */}
         </div>
       )}
       {!isOpen && (

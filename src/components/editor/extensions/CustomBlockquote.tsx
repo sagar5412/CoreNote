@@ -22,4 +22,37 @@ export const CustomBlockquote = Blockquote.extend({
       className: "custom-blockquote-node",
     });
   },
+  addKeyboardShortcuts() {
+    return {
+      "Mod-Enter": () => {
+        return this.editor
+          .chain()
+          .focus()
+          .exitCode()
+          .insertContentAt(this.editor.state.selection.$to.after(), {
+            type: "paragraph",
+          })
+          .focus()
+          .run();
+      },
+
+      Enter: ({ editor }) => {
+        const { state } = editor;
+        const { $from } = state.selection;
+        const node = $from.node($from.depth);
+
+        if (!editor.isActive("blockquote")) {
+          return false;
+        }
+        const isEmptyParagraph =
+          node.type.name === "paragraph" && node.textContent === "";
+
+        if (isEmptyParagraph) {
+          return editor.chain().focus().lift("blockquote").run();
+        }
+
+        return false;
+      },
+    };
+  },
 });
