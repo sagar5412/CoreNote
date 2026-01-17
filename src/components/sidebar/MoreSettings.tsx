@@ -17,9 +17,16 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { useState } from "react";
+import { signOut } from "next-auth/react";
+import { LogOut } from "lucide-react";
 
 export function MoreSettings() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/" });
+  };
+
   return (
     <TooltipProvider>
       <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
@@ -53,6 +60,16 @@ export function MoreSettings() {
             <DropdownMenuItem>
               <TemplateIcon />
               Templates
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              className="focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/50"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign out
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
