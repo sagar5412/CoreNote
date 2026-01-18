@@ -2,7 +2,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import Home from "@/components/Home"; // your landing page
+import Home from "@/components/Home";
+import { welcomeContent } from "@/components/WelcomePage";
 
 export default async function EntryPage() {
   const session = await getServerSession(authOptions);
@@ -11,7 +12,7 @@ export default async function EntryPage() {
     return <Home />;
   }
 
-  const firstPage = await prisma.page.findFirst({
+  let firstPage = await prisma.page.findFirst({
     where: {
       ownerId: session.user.id,
       parentId: null,
@@ -21,8 +22,16 @@ export default async function EntryPage() {
   });
 
   if (!firstPage) {
-    // later: auto-create first or welcome or previous viewed page
-    return <div>No pages yet</div>;
+    firstPage = await prisma.page.create({
+      data: {
+        title: "Welcome to CoreNote",
+        icon: "👋",
+        content: welcomeContent(),
+        ownerId: session.user.id,
+        position: 0,
+      },
+      select: { id: true },
+    });
   }
 
   redirect(`/${firstPage.id}`);
