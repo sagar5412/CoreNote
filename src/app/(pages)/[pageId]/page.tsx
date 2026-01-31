@@ -53,6 +53,10 @@ export default function PageEditor() {
     }
   }, [debouncedContent]);
 
+  useEffect(() => {
+    document.title = title ? title : "CoreNote";
+  }, [title]);
+
   const handlePageClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.tagName === "INPUT" || target.closest(".ProseMirror")) {
